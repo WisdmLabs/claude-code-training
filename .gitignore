@@ -1,0 +1,9 @@
+node_modules/
+.venv/
+venv/
+__pycache__/
+dist/
+build/
+.next/
+.claude/settings.local.json
+.claude/agent-usage.json
