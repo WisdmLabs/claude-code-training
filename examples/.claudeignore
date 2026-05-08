@@ -1,0 +1,42 @@
+# Build artifacts
+dist/
+build/
+.next/
+out/
+
+# Dependencies
+node_modules/
+vendor/
+
+# Large generated files
+*.min.js
+*.min.css
+*.bundle.js
+*.map
+
+# Binary and media files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.woff
+*.woff2
+*.ttf
+*.eot
+*.mp4
+*.mp3
+
+# Environment and secrets
+.env
+.env.local
+.env.production
+
+# Lock files (large, not useful for context)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Coverage and test artifacts
+coverage/
+.nyc_output/

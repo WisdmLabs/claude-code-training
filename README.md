@@ -45,6 +45,18 @@ Each module includes:
 | [Configuration Best Practices](resources/config-best-practices.md) | Production-grade configuration guide |
 | [Glossary](resources/glossary.md) | Key terms and concepts |
 
+## Example Configs
+
+Copy-paste starter files in the [`examples/`](examples/) directory:
+
+| File | Purpose |
+|------|---------|
+| [`settings.json`](examples/settings.json) | Permissions, deny list, auto-format hook |
+| [`CLAUDE.md`](examples/CLAUDE.md) | Project instructions template |
+| [`.mcp.json`](examples/.mcp.json) | Essential MCP servers |
+| [`.claudeignore`](examples/.claudeignore) | Context exclusion patterns |
+| [`hooks-settings.json`](examples/hooks-settings.json) | Advanced hooks: guardrails, logging, notifications |
+
 ## Prerequisites
 
 - Claude Code CLI installed (`npm install -g @anthropic-ai/claude-code`)

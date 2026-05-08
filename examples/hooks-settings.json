@@ -1,0 +1,43 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "command": "prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true",
+        "description": "Auto-format files after Claude edits them",
+        "timeout": 5000
+      },
+      {
+        "matcher": "Bash",
+        "command": "echo \"$(date '+%H:%M:%S') BASH: $(echo $CLAUDE_TOOL_INPUT | head -c 100)\" >> /tmp/claude-tool-log.txt || true",
+        "description": "Log all bash commands for auditing"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "command": "echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'rm -rf|DROP TABLE|--force|--no-verify' && echo 'BLOCKED: dangerous command' && exit 1 || exit 0",
+        "description": "Block dangerous bash commands"
+      },
+      {
+        "matcher": "Edit|Write",
+        "command": "echo \"$CLAUDE_FILE_PATH\" | grep -qE '\\.env|\\.pem|credentials|secrets' && echo 'BLOCKED: sensitive file' && exit 1 || exit 0",
+        "description": "Block edits to sensitive files"
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "command": "osascript -e 'display notification \"Claude needs your attention\" with title \"Claude Code\"' 2>/dev/null || notify-send 'Claude Code' 'Claude needs your attention' 2>/dev/null || true",
+        "description": "Desktop notification when Claude needs input (macOS and Linux)"
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "command": "echo \"Session started at $(date) in $(pwd)\" >> /tmp/claude-sessions.log || true",
+        "description": "Log session starts"
+      }
+    ]
+  }
+}

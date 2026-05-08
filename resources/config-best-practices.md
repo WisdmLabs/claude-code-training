@@ -14,23 +14,30 @@ A practical guide derived from a production-grade Claude Code setup. This docume
 6. [CLAUDE.md (Global Instructions)](#claudemd-global-instructions)
 7. [Project-Level Configuration](#project-level-configuration)
 8. [Memory System](#memory-system)
-9. [Environment Variables](#environment-variables)
-10. [Status Line](#status-line)
-11. [Security Considerations](#security-considerations)
-12. [Recommendations Summary](#recommendations-summary)
+9. [Hooks Configuration](#hooks-configuration)
+10. [Environment Variables](#environment-variables)
+11. [Status Line](#status-line)
+12. [Security Considerations](#security-considerations)
+13. [Recommendations Summary](#recommendations-summary)
+14. [Getting Started Checklist](#getting-started-checklist)
 
 ---
 
 ## Configuration Hierarchy
 
-Claude Code uses a layered configuration system. Understanding the priority order is critical:
+Claude Code uses a layered configuration system. **Higher layers override lower layers:**
 
 ```
-User Global (~/.claude/settings.json)        ← applies to ALL projects
-  └── User Local (~/.claude/settings.local.json)  ← personal overrides, not committed
-      └── Project (.claude/settings.json)         ← shared with team via git
-          └── Project Local (.claude/settings.local.json) ← personal project overrides
+Project Local (.claude/settings.local.json)  ← HIGHEST priority (personal project overrides)
+  ↑ overrides
+Project (.claude/settings.json)              ← shared with team via git
+  ↑ overrides
+User Local (~/.claude/settings.local.json)   ← personal overrides, not committed
+  ↑ overrides
+User Global (~/.claude/settings.json)        ← LOWEST priority (applies to ALL projects)
 ```
+
+When the same setting appears at multiple levels, the most specific (project-local) wins.
 
 **Best Practice:** Keep team-shared configuration in project-level `settings.json`. Keep personal tools, paths, and experimental features in `settings.local.json` files (which should be gitignored).
 
@@ -60,13 +67,13 @@ User Global (~/.claude/settings.json)        ← applies to ALL projects
 |---------|-------|-----|
 | `skipAutoPermissionPrompt` | `true` | Prevents interruptions — you've already defined an explicit allowlist |
 | `disableAutoMode` | `"disable"` | Forces consistent permission behavior instead of letting Claude auto-escalate |
-| `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | `"1"` | Enables the Agent Teams feature for multi-agent orchestration |
+| `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | `"1"` | Enables Agent Teams. Check periodically -- experimental flags become defaults over time |
 
 ### Best Practices for Settings
 
-1. **Be explicit about defaults.** Setting `defaultMode: "auto"` in permissions makes the intent clear even though it's the default.
-2. **Use env vars for experimental features.** This keeps experimental toggles visible and easy to revert.
-3. **Don't over-configure.** Only set values that differ from defaults or that you want to be explicit about for team clarity.
+1. **Use env vars for experimental features.** This keeps experimental toggles visible and easy to revert.
+2. **Don't over-configure.** Only set values that differ from defaults or that you want to be explicit about for team clarity.
+3. **Avoid contradictory settings.** If you set `disableAutoMode: "disable"`, don't also set `defaultMode: "auto"` -- the two conflict. Pick one approach and be consistent.
 
 ---
 
@@ -76,20 +83,28 @@ The current setup uses a comprehensive allowlist approach. This is the **most se
 
 ### Structure of Permission Rules
 
+```jsonc
+"permissions": {
+  "allow": [
+    "ToolName",                    // Allow tool entirely
+    "Bash(command prefix:*)",      // Allow specific command patterns
+    "Read(//path/pattern/**)",     // Allow reads to specific paths
+    "mcp__server__tool_name"       // Allow specific MCP tool calls
+  ],
+  "deny": [
+    "Bash(rm -rf *)",             // Block even if broader allow exists
+    "Bash(git push --force *)"    // Deny rules take precedence over allow
+  ]
+}
 ```
-"allow": [
-  "ToolName",                    // Allow tool entirely
-  "Bash(command prefix:*)",      // Allow specific command patterns
-  "Read(//path/pattern/**)",     // Allow reads to specific paths
-  "mcp__server__tool_name"       // Allow specific MCP tool calls
-]
-```
+
+The `deny` list is critical for blocking dangerous patterns even when broad `allow` rules are in place. Deny always wins over allow.
 
 ### Current Allowlist Categories
 
 | Category | Examples | Purpose |
 |----------|----------|---------|
-| **Core Tools** | `Read`, `Edit`, `Write`, `Glob`, `Grep` | File operations — always safe to allow |
+| **Core Tools** | `Read`, `Edit`, `Write` | File operations -- always safe to allow |
 | **Git Operations** | `Bash(git status:*)`, `Bash(git commit:*)` | Full git workflow without prompts |
 | **Package Managers** | `Bash(npm run:*)`, `Bash(composer:*)`, `Bash(pnpm:*)` | Build & dependency management |
 | **PHP Toolchain** | `Bash(phpcs:*)`, `Bash(phpunit:*)`, `Bash(phpstan:*)` | WordPress/PHP quality tools |
@@ -162,7 +177,7 @@ Commands to **consider removing** from auto-allow (require manual approval inste
    - `Piebald-AI/claude-code-lsps` (community)
    - `thedotmack/claude-mem` (community)
    - `severity1/severity1-marketplace` (community)
-   - `vercel/vercel-plugin` (local directory install)
+   - `vercel/vercel-plugin` (local directory install -- specific to this config)
 4. **Review plugin updates.** Plugins auto-update — check changelogs periodically for breaking changes.
 5. **One LSP per language.** Don't enable both `phpactor` and `php-lsp`, or both `vtsls` and `typescript-lsp`.
 
@@ -222,7 +237,7 @@ The current CLAUDE.md focuses exclusively on CodeGraph — a semantic code navig
 
 ### Best Practices for Global CLAUDE.md
 
-1. **Keep it short.** Every token here is loaded into every conversation. Current size (~30 lines) is appropriate.
+1. **Keep it short.** Every token here is loaded into every conversation. Aim for under 60 lines / 1,000 tokens.
 2. **Only include always-relevant instructions.** CodeGraph applies to any codebase — good fit for global.
 3. **Don't duplicate rules.** Rules files handle behavioral patterns; CLAUDE.md handles tool awareness.
 4. **Use conditional patterns.** "If X exists, do Y; otherwise, do Z" makes the instruction adaptive.
@@ -238,15 +253,14 @@ The current CLAUDE.md focuses exclusively on CodeGraph — a semantic code navig
 {
   "permissions": {
     "allow": [
-      "Read(//home/arunesh/.claude/**)",
-      "Read(//home/arunesh/.claude/plugins/**)",
+      "Read(//home/<user>/.claude/**)",
       "Bash(gh auth *)"
     ]
   }
 }
 ```
 
-This grants the project permission to read Claude's own configuration — useful for self-documentation tasks (like generating this document).
+This example grants the project permission to read Claude's own configuration -- useful for self-documentation tasks. Replace `<user>` with your actual home directory path. Since this file is gitignored, personal paths are safe here.
 
 ### Best Practices
 
@@ -261,23 +275,101 @@ This grants the project permission to read Claude's own configuration — useful
 
 The memory system (`~/.claude/projects/<path>/memory/`) persists context across sessions.
 
+### How Memory Differs from CLAUDE.md
+
+| | CLAUDE.md | Memory |
+|-|-----------|--------|
+| **Content** | Instructions you write | Facts Claude learns |
+| **Created by** | You, manually | Claude, automatically (or on request) |
+| **Purpose** | "How to behave" | "What I know about this project" |
+| **Loaded** | Always, at session start | MEMORY.md index loaded; individual files on demand |
+
 ### Current Memory Organization
 
 The setup uses project-scoped memory with several patterns observed:
 
-- `MEMORY.md` — Index file per project
-- `user_*.md` — User context (role, preferences)
-- `project_*.md` — Project decisions and state
-- `feedback_*.md` — Behavioral corrections
-- `reference_*.md` — External system pointers
+- `MEMORY.md` -- Index file (loaded every session, like CLAUDE.md)
+- `user_*.md` -- User context (role, preferences)
+- `project_*.md` -- Project decisions and state
+- `feedback_*.md` -- Behavioral corrections
+- `reference_*.md` -- External system pointers
+
+### Memory File Format
+
+Each memory file uses YAML frontmatter for searchability:
+
+```markdown
+---
+name: testing-preferences
+description: User prefers real databases over mocks in integration tests
+type: feedback
+---
+
+Use real database connections in integration tests, not mocks.
+
+**Why:** A past incident where mock/prod divergence masked a broken migration.
+**How to apply:** Any test file in tests/integration/ should use the test database.
+```
 
 ### Best Practices
 
 1. **One memory per concept.** Don't combine unrelated information.
-2. **Use frontmatter.** Each memory file should have `name`, `description`, and `type` fields for searchability.
-3. **Keep MEMORY.md under 200 lines.** It's loaded every session — keep entries to one-line summaries.
+2. **Always use frontmatter.** The `name`, `description`, and `type` fields enable search and relevance filtering.
+3. **Keep MEMORY.md under 200 lines.** It's loaded every session -- each entry should be a one-line summary with a link.
 4. **Prune stale memories.** Project decisions change; review memories periodically.
 5. **Don't store code patterns.** Those belong in the code itself, not memory. Memory is for non-obvious context.
+6. **Memory is for facts, not instructions.** "We use pnpm" is an instruction (goes in CLAUDE.md). "The auth rewrite is driven by compliance requirements" is a fact (goes in memory).
+
+---
+
+## Hooks Configuration
+
+Hooks are shell commands configured in `settings.json` that execute at specific lifecycle points. They provide **deterministic** control -- unlike CLAUDE.md instructions which Claude may not follow, hooks always execute.
+
+### Essential Hook Patterns
+
+```jsonc
+{
+  "hooks": {
+    // Auto-format every file Claude edits
+    "PostToolUse": [{
+      "matcher": "Edit|Write",
+      "command": "prettier --write \"$CLAUDE_FILE_PATH\"",
+      "timeout": 5000
+    }],
+
+    // Block dangerous commands before execution
+    "PreToolUse": [{
+      "matcher": "Bash",
+      "command": "echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'rm -rf|DROP TABLE|--force' && exit 1 || exit 0"
+    }],
+
+    // Notify when Claude finishes or needs input
+    "Notification": [{
+      "matcher": "",
+      "command": "osascript -e 'display notification \"Claude needs attention\" with title \"Claude Code\"'"
+    }]
+  }
+}
+```
+
+### Best Practices for Hooks
+
+1. **Keep hooks fast.** They run synchronously and block Claude Code. Target under 1 second.
+2. **Use `|| true` for non-critical hooks.** A failing hook on `PreToolUse` blocks the tool. Use `|| true` to make logging/notification hooks non-blocking.
+3. **Use `matcher` to scope hooks.** Without a matcher, the hook runs for ALL tools. `"matcher": "Edit|Write"` limits it to file changes.
+4. **Test hooks before deploying.** A broken `PreToolUse` hook can block all tool use, making Claude Code unusable. Test with a simple echo first.
+5. **Separate concerns.** One hook per purpose -- don't combine formatting and logging in a single command.
+
+### Hooks vs CLAUDE.md vs Rules
+
+| Mechanism | Guarantee | Best For |
+|-----------|-----------|----------|
+| Hooks | **Deterministic** -- always runs | Formatting, validation, guardrails, notifications |
+| CLAUDE.md | **Probabilistic** -- usually followed | Coding conventions, project context |
+| Rules | **Probabilistic** -- usually followed | Behavioral patterns, workflow habits |
+
+Use hooks for "every single time without exception." Use CLAUDE.md/rules for "most of the time."
 
 ---
 
@@ -310,11 +402,16 @@ The setup uses project-scoped memory with several patterns observed:
 
 This runs a custom status line tool that shows contextual information in the Claude Code interface.
 
+### The Built-in Alternative
+
+Claude Code has a built-in `/statusline` command. Describe what you want (e.g., "show model name and context percentage with a progress bar") and it generates the script automatically -- no npm package needed.
+
 ### Best Practices
 
-1. **Use `@latest` carefully.** Convenient but can break if the package introduces breaking changes. Consider pinning for stability.
-2. **Keep padding minimal.** `padding: 0` maximizes screen real estate.
-3. **Ensure the command is fast.** Status line commands run frequently — avoid expensive operations.
+1. **Try `/statusline` first.** The built-in generator covers most needs without external dependencies.
+2. **Use `@latest` carefully.** Convenient but can break if the package introduces breaking changes. Consider pinning for stability.
+3. **Keep padding minimal.** `padding: 0` maximizes screen real estate.
+4. **Ensure the command is fast.** Status line commands run frequently -- avoid expensive operations.
 
 ---
 
@@ -369,6 +466,53 @@ This runs a custom status line tool that shows contextual information in the Cla
 
 ---
 
+## Getting Started Checklist
+
+Minimum viable config for day one:
+
+1. **Create `~/.claude/settings.json`** with 5-10 essential permissions:
+```json
+{
+  "permissions": {
+    "allow": ["Read", "Edit", "Write", "Bash(git *)", "Bash(npm run *)"],
+    "deny": ["Bash(rm -rf *)"]
+  }
+}
+```
+
+2. **Create project `CLAUDE.md`** with tech stack and commands:
+```markdown
+## Tech Stack
+- Node.js with TypeScript
+- React frontend, Express backend
+
+## Commands
+- Dev: `npm run dev`
+- Test: `npm test`
+- Build: `npm run build`
+```
+
+3. **Install Context7** for up-to-date library docs:
+```
+/install context7
+```
+
+4. **Add one hook** -- auto-format on edit:
+```json
+{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Edit|Write",
+      "command": "prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true"
+    }]
+  }
+}
+```
+
+Everything else can be added as you discover needs.
+
+---
+
 ## Quick Reference: File Locations
 
 | File | Scope | Purpose |
@@ -377,7 +521,9 @@ This runs a custom status line tool that shows contextual information in the Cla
 | `~/.claude/settings.local.json` | Global (personal) | Personal overrides, not synced |
 | `~/.claude/CLAUDE.md` | Global | Always-loaded instructions |
 | `~/.claude/rules/*.md` | Global | Behavioral rules for all projects |
+| `~/.claude/keybindings.json` | Global | Custom keyboard shortcuts |
 | `.claude/settings.json` | Project (team) | Team-shared project config |
 | `.claude/settings.local.json` | Project (personal) | Personal project overrides |
 | `CLAUDE.md` (project root) | Project | Repo-specific instructions |
+| `.claudeignore` | Project | Files to exclude from context |
 | `~/.claude/projects/<path>/memory/` | Project | Persistent cross-session context |
