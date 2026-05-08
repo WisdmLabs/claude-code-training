@@ -51,7 +51,7 @@ Hooks live in `settings.json` (project or global):
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "command": "echo $CLAUDE_TOOL_INPUT | grep -q 'rm -rf' && exit 1 || exit 0",
+        "command": "echo $CLAUDE_TOOL_INPUT | grep -q 'rm -rf' && echo 'BLOCKED: rm -rf' >&2 && exit 2 || exit 0",
         "description": "Block rm -rf commands"
       }
     ],
@@ -141,7 +141,7 @@ Claude Code sets these variables before running hooks:
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
-        "command": "echo $CLAUDE_TOOL_INPUT | grep -q '\"file_path\".*\\.env' && echo 'BLOCKED: Cannot edit .env files' && exit 1 || exit 0",
+        "command": "echo $CLAUDE_TOOL_INPUT | grep -q '\"file_path\".*\\.env' && echo 'BLOCKED: Cannot edit .env files' >&2 && exit 2 || exit 0",
         "description": "Prevent editing .env files"
       }
     ]
@@ -169,10 +169,10 @@ Claude Code sets these variables before running hooks:
 | Exit code | Effect |
 |-----------|--------|
 | `0` | Success — continue normally |
-| `1` | Failure — **block the action** (for PreToolUse) |
-| Other | Error — logged but doesn't block |
+| `1` | Non-blocking error — action **proceeds anyway** (logged as warning) |
+| `2` | Blocking error — **prevents the action** (stderr becomes error message) |
 
-For `PreToolUse` hooks, exit code 1 prevents the tool from executing. This is how you create guardrails.
+For `PreToolUse` hooks, **exit code 2** prevents the tool from executing. This is how you create guardrails. Note: exit code 1 does NOT block — it is treated as a non-blocking failure. Always use `exit 2` and write the reason to stderr.
 
 ## 7.7 Hooks vs Skills vs CLAUDE.md
 
@@ -224,7 +224,7 @@ Key insight: If you need something to happen **every single time** without excep
 
 1. Hooks are deterministic event-driven automation — they always run, unlike prompts
 2. Five event types: SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop
-3. PreToolUse hooks with exit code 1 can block dangerous operations
+3. PreToolUse hooks with exit code 2 block dangerous operations (exit 1 does NOT block)
 4. Use hooks for things that must happen every time — formatting, logging, guardrails
 5. Keep hooks fast — they block Claude Code while running
 6. Configure in `settings.json` with `matcher`, `command`, and `description`

@@ -341,7 +341,7 @@ Hooks are shell commands configured in `settings.json` that execute at specific 
     // Block dangerous commands before execution
     "PreToolUse": [{
       "matcher": "Bash",
-      "command": "echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'rm -rf|DROP TABLE|--force' && exit 1 || exit 0"
+      "command": "echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'rm -rf|DROP TABLE|--force' && echo 'BLOCKED: dangerous command' >&2 && exit 2 || exit 0"
     }],
 
     // Notify when Claude finishes or needs input
@@ -356,7 +356,7 @@ Hooks are shell commands configured in `settings.json` that execute at specific 
 ### Best Practices for Hooks
 
 1. **Keep hooks fast.** They run synchronously and block Claude Code. Target under 1 second.
-2. **Use `|| true` for non-critical hooks.** A failing hook on `PreToolUse` blocks the tool. Use `|| true` to make logging/notification hooks non-blocking.
+2. **Use `|| true` for non-critical hooks.** A PreToolUse hook that exits with code 2 blocks the tool. Exit 1 is a non-blocking error (action proceeds). Use `|| true` to prevent logging/notification hooks from accidentally returning exit 2.
 3. **Use `matcher` to scope hooks.** Without a matcher, the hook runs for ALL tools. `"matcher": "Edit|Write"` limits it to file changes.
 4. **Test hooks before deploying.** A broken `PreToolUse` hook can block all tool use, making Claude Code unusable. Test with a simple echo first.
 5. **Separate concerns.** One hook per purpose -- don't combine formatting and logging in a single command.

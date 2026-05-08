@@ -16,12 +16,12 @@
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "command": "echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'rm -rf|DROP TABLE|--force|--no-verify' && echo 'BLOCKED: dangerous command' && exit 1 || exit 0",
+        "command": "echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'rm -rf|DROP TABLE|--force|--no-verify' && echo 'BLOCKED: dangerous command' >&2 && exit 2 || exit 0",
         "description": "Block dangerous bash commands"
       },
       {
         "matcher": "Edit|Write",
-        "command": "echo \"$CLAUDE_FILE_PATH\" | grep -qE '\\.env|\\.pem|credentials|secrets' && echo 'BLOCKED: sensitive file' && exit 1 || exit 0",
+        "command": "echo \"$CLAUDE_FILE_PATH\" | grep -qE '\\.env|\\.pem|credentials|secrets' && echo 'BLOCKED: sensitive file' >&2 && exit 2 || exit 0",
         "description": "Block edits to sensitive files"
       }
     ],
