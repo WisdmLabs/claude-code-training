@@ -1,6 +1,6 @@
 # Module 0: Setup & First Run
 
-**Duration**: 30 minutes | **Level**: Beginner
+**Duration**: 40 minutes | **Level**: Beginner
 
 ## TL;DR
 
@@ -42,6 +42,14 @@ claude
 
 Claude Code launches in your terminal with an interactive prompt. It sees the working directory and can read/write files, run commands, and interact with git.
 
+### Updating
+
+```bash
+npm update -g @anthropic-ai/claude-code
+```
+
+Claude Code updates frequently. Check your version with `claude --version` and update regularly to get new features and bug fixes.
+
 ## 0.2 Where Claude Code Runs
 
 Claude Code is available in multiple environments:
@@ -54,7 +62,17 @@ Claude Code is available in multiple environments:
 | **VS Code** | Extension from marketplace |
 | **JetBrains** | Plugin from marketplace |
 
-All environments share the same core engine. The CLI is the most full-featured.
+All environments share the same core engine. Key differences:
+
+| Environment | Strengths | Limitations |
+|-------------|-----------|-------------|
+| **Terminal CLI** | Most full-featured, scriptable, supports all flags | Text-only interface |
+| **Desktop App** | Native OS integration, easier onboarding | Fewer advanced flags |
+| **Web App** | No install needed, accessible anywhere | Requires internet, no local file access without setup |
+| **VS Code** | Inline in your editor, sees open files | Subset of CLI features |
+| **JetBrains** | Inline in your IDE, project-aware | Subset of CLI features |
+
+The CLI is the reference environment for this course. IDE extensions are useful for quick tasks without leaving your editor.
 
 ## 0.3 The Interaction Model
 
@@ -121,6 +139,33 @@ Once inside Claude Code, try these:
 2. Restart with: `claude --permission-mode plan`
 3. Ask Claude to make a change — notice it creates a plan first
 4. Approve or reject the plan
+
+---
+
+## 0.6 Security Basics
+
+### Trusting Projects
+
+When you open Claude Code in a cloned repository, it may contain `.claude/settings.json` with pre-configured permissions, hooks, and MCP servers. **Always review these before trusting a project:**
+
+```bash
+cat .claude/settings.json   # Check what permissions the project requests
+cat .mcp.json               # Check what MCP servers it configures
+```
+
+A malicious project could configure hooks or settings that execute arbitrary commands. Claude Code shows a trust prompt for new projects -- read it carefully.
+
+### API Key Safety
+
+- Never put API keys in `CLAUDE.md` or `settings.json` (both may be committed to git)
+- Use `settings.local.json` (gitignored) or system environment variables for secrets
+- Use the `env` field in MCP configs for connection strings, not hardcoded values
+
+### Permission Discipline
+
+- Start with restrictive permissions and expand as needed
+- Read permission prompts before approving, especially for shell commands
+- Use `--permission-mode plan` when working with unfamiliar code
 
 ---
 

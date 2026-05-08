@@ -8,20 +8,20 @@ Built from the community best practices at [shanraisshan/claude-code-best-practi
 
 | Module | Topic | Duration | Level |
 |--------|-------|----------|-------|
-| [0](modules/00-setup.md) | Setup & First Run | 30 min | Beginner |
+| [0](modules/00-setup.md) | Setup & First Run | 40 min | Beginner |
 | [1](modules/01-foundations.md) | Foundations: How Claude Code Works | 45 min | Beginner |
 | [2](modules/02-context-and-memory.md) | Context & Memory System | 45 min | Beginner |
 | [3](modules/03-commands.md) | Commands: Built-in & Custom | 45 min | Intermediate |
 | [4](modules/04-skills.md) | Skills: Reusable Procedures | 45 min | Intermediate |
 | [5](modules/05-subagents.md) | Subagents: Parallel Workers | 60 min | Intermediate |
-| [6](modules/06-mcp-servers.md) | MCP Servers: Extending Capabilities | 45 min | Intermediate |
+| [6](modules/06-mcp-servers.md) | MCP Servers & Plugins: Extending Capabilities | 60 min | Intermediate |
 | [7](modules/07-hooks.md) | Hooks: Event-Driven Automation | 45 min | Advanced |
 | [8](modules/08-orchestration.md) | Orchestration: Command + Agent + Skill | 60 min | Advanced |
 | [9](modules/09-agent-teams.md) | Agent Teams: Multi-Session Coordination | 60 min | Advanced |
 | [10](modules/10-workflows.md) | Real-World Workflows & Patterns | 60 min | Advanced |
 | [11](modules/11-tips-and-optimization.md) | Tips, Tricks & Optimization | 60 min | All |
 
-**Total: ~9.25 hours of structured learning**
+**Total: ~9.75 hours of structured learning**
 
 ## How to Use This Course
 

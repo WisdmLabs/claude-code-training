@@ -14,6 +14,10 @@
 
 **Context Degradation**: Loss of recall and quality as the context window fills with conversation history and tool outputs. Mitigate with fresh sessions and `/compact`.
 
+**Memory System**: Persistent, file-based storage in `~/.claude/projects/<path>/memory/` for facts and learnings that survive across sessions. Types: user, feedback, project, reference.
+
+**Prompt Caching**: Automatic reuse of processed context (system prompt, CLAUDE.md, early conversation) across turns. Cache TTL is ~5 minutes. Reduces cost and latency.
+
 ## Extensions
 
 **Agent (Subagent)**: An isolated Claude instance spawned within a session. Has its own context window. Used for research, review, and parallel work.
@@ -25,6 +29,10 @@
 **MCP (Model Context Protocol)**: A standard protocol for connecting Claude to external tools and data sources. MCP servers expose tools and resources.
 
 **MCP Server**: A process that provides tools to Claude via the MCP protocol. Examples: Playwright (browser), Context7 (docs), PostgreSQL (database).
+
+**Plugin**: An installable package that bundles agents, skills, hooks, and MCP servers from a marketplace. Installed with `/install`.
+
+**Marketplace**: A repository of plugins. Official marketplace is `claude-plugins-official`; community marketplaces are third-party.
 
 **Skill**: A reusable procedure defined in markdown. Can be auto-invoked based on user intent or called explicitly. Runs inline in the current context.
 
@@ -87,3 +95,17 @@
 **`settings.json`**: Configuration for permissions, hooks, and environment variables. Exists at global (`~/.claude/`) and project (`.claude/`) levels.
 
 **`settings.local.json`**: Local settings overrides. Gitignored. Highest precedence.
+
+**`.claudeignore`**: File listing patterns to exclude from Claude's context (like `.gitignore`). Prevents reading build artifacts, binaries, etc.
+
+**`MEMORY.md`**: Index file in the memory directory. Loaded every session. Maps to individual memory files.
+
+**`keybindings.json`**: Custom keyboard shortcuts in `~/.claude/keybindings.json`.
+
+## Thinking Keywords
+
+**think**: Triggers extended thinking with a standard token budget.
+
+**think hard**: Triggers extended thinking with a larger token budget for complex problems.
+
+**ultrathink**: Triggers maximum thinking budget. Use for architecture decisions and gnarly debugging.

@@ -4,7 +4,7 @@
 
 ## TL;DR
 
-A curated collection of practical tips from the Claude Code community and Anthropic engineers. Organized by topic: prompting, context, performance, debugging, and hidden features.
+A curated collection of practical tips from the Claude Code community, Anthropic engineers, and discussions across GitHub, Reddit, and Hacker News. Covers prompting frameworks, context and cache management, thinking budgets, the slot machine pattern, CLAUDE.md optimization, verification loops, cost control, and language suitability.
 
 ---
 

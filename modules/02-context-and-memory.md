@@ -161,7 +161,84 @@ project (.claude/settings.json)
 global (~/.claude/settings.json)       ← Lowest
 ```
 
-## 2.6 Design Principles
+## 2.6 Persistent Memory System
+
+Beyond CLAUDE.md (which is instruction-based), Claude Code has a **memory system** that stores facts and learnings across sessions.
+
+### How It Works
+
+Memory files live in `~/.claude/projects/<project-path>/memory/`:
+
+```
+~/.claude/projects/<project-path>/memory/
+├── MEMORY.md                  ← Index file (always loaded)
+├── user_role.md               ← Who you are
+├── feedback_testing.md        ← Behavioral corrections
+├── project_auth_rewrite.md    ← Project decisions
+└── reference_linear.md        ← External system pointers
+```
+
+### Memory Types
+
+| Type | What to Store | Example |
+|------|---------------|---------|
+| **user** | Role, preferences, expertise | "Senior backend engineer, new to React" |
+| **feedback** | Corrections to Claude's approach | "Don't mock the database in integration tests" |
+| **project** | Decisions, goals, deadlines | "Auth rewrite driven by compliance, not tech debt" |
+| **reference** | Pointers to external systems | "Bugs tracked in Linear project INGEST" |
+
+### Using Memory
+
+- **Ask Claude to remember**: "Remember that we use Vitest, not Jest"
+- **Check memory**: `/memory` shows current project memories
+- **Claude saves automatically** when it learns relevant context from your corrections
+
+### What NOT to Store in Memory
+
+- Code patterns or conventions → put in CLAUDE.md
+- Git history or recent changes → use `git log`
+- Debugging solutions → the fix is in the code
+- Temporary task details → use the conversation
+
+### MEMORY.md
+
+The `MEMORY.md` index file is loaded into every session (like CLAUDE.md). Keep it under 200 lines -- each entry should be one line:
+
+```markdown
+- [User role](user_role.md) — Senior backend engineer, Go expert, React beginner
+- [Testing feedback](feedback_testing.md) — Always use real DB in integration tests
+- [Auth rewrite](project_auth_rewrite.md) — Compliance-driven, deadline March 15
+```
+
+## 2.7 Excluding Files from Context
+
+### `.claudeignore`
+
+Create a `.claudeignore` file (like `.gitignore`) to exclude files from Claude's context:
+
+```
+# Build artifacts
+dist/
+build/
+.next/
+
+# Large generated files
+*.min.js
+*.bundle.js
+
+# Binary files
+*.png
+*.jpg
+*.woff2
+
+# Dependencies
+node_modules/
+vendor/
+```
+
+This prevents Claude from wasting context on files it shouldn't read.
+
+## 2.8 Design Principles
 
 1. **Ancestors always load** — Root-level CLAUDE.md is always in context
 2. **Descendants load on demand** — Subdirectory files only load when Claude visits them

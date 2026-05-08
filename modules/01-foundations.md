@@ -69,6 +69,16 @@ As your conversation grows, older messages get compressed or dropped. This means
 4. **Be specific** — "Edit line 42 of auth.ts" uses less context than "Find and fix the auth bug"
 5. **Use subagents** for research tasks — they have isolated context
 
+### Prompt Caching
+
+Claude Code automatically uses prompt caching to reduce costs and latency. Cached content (system prompt, CLAUDE.md, early conversation) is reused across turns without re-processing.
+
+Key implications:
+- **Cache TTL is ~5 minutes** — if you're idle for more than 5 minutes, the cache expires and the next turn is slower/costlier
+- **Manually editing files mid-session busts the cache** — let Claude do all file edits
+- **Stable CLAUDE.md content maximizes cache hits** — it's loaded every turn
+- **`/compact` invalidates the cache** — use it strategically, not reflexively
+
 ### The golden rule:
 
 > One task per session. When context degrades, start a new session.
@@ -133,7 +143,25 @@ claude --allowedTools "Read,Edit"
 claude --disallowedTools "Bash"
 ```
 
-## 1.5 Environment Variables
+## 1.5 Plan Mode
+
+Plan mode is one of the most powerful features for complex tasks. Toggle it with **Shift+Tab** (press twice) or launch with:
+
+```bash
+claude --permission-mode plan
+```
+
+In plan mode:
+1. Claude analyzes the task and proposes a step-by-step plan
+2. You review, edit, or approve the plan
+3. Only after approval does Claude execute
+
+Boris from the Anthropic team says plan mode **multiplies results 2-3x** for complex tasks. Use it for:
+- Refactoring across multiple files
+- Implementing features with unclear requirements
+- Any task where you want to review the approach before execution
+
+## 1.6 Environment Variables
 
 Configure defaults without flags:
 
@@ -148,7 +176,7 @@ export CLAUDE_CODE_PERMISSION_MODE=auto
 export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 ```
 
-## 1.6 The `/doctor` Command
+## 1.7 The `/doctor` Command
 
 Diagnose issues:
 

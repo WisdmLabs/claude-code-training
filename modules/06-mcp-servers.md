@@ -1,10 +1,10 @@
-# Module 6: MCP Servers — Extending Capabilities
+# Module 6: MCP Servers & Plugins — Extending Capabilities
 
-**Duration**: 45 minutes | **Level**: Intermediate
+**Duration**: 60 minutes | **Level**: Intermediate
 
 ## TL;DR
 
-MCP (Model Context Protocol) servers give Claude Code new tools beyond its built-in set. They connect Claude to browsers, databases, APIs, documentation, and more. Configure them in `.mcp.json` or `~/.claude.json`.
+MCP servers and plugins extend Claude Code beyond its built-in tools. MCP servers connect Claude to browsers, databases, and APIs. Plugins bundle agents, skills, and tools from community marketplaces. Configure MCP in `.mcp.json`; install plugins with `/install`.
 
 ---
 
@@ -200,6 +200,73 @@ Example tools a custom server might expose:
 - Read from your documentation wiki
 - Post to your team's Slack channels
 
+## 6.8 Plugins & Marketplaces
+
+Plugins are a higher-level extension system that bundles agents, skills, hooks, and tools into installable packages.
+
+### What Plugins Provide
+
+| Component | What It Adds |
+|-----------|-------------|
+| **Agents** | Specialized subagent definitions |
+| **Skills** | Reusable procedures |
+| **Hooks** | Lifecycle automation |
+| **MCP Servers** | External tool connections |
+| **Slash Commands** | Custom commands |
+
+### Installing Plugins
+
+```
+/install context7
+```
+
+Or from a specific marketplace:
+
+```
+/install security-review@claude-plugins-official
+```
+
+### Official vs Community Marketplaces
+
+| Source | Trust Level | Example |
+|--------|-------------|---------|
+| **Official** (`claude-plugins-official`) | Curated by Anthropic | context7, playwright, github, security-guidance |
+| **Community** | Third-party, review before use | Various specialized plugins |
+
+### Managing Plugins
+
+View installed plugins:
+```
+/mcp
+```
+
+Enable/disable in `settings.json`:
+```json
+{
+  "enabledPlugins": {
+    "context7": true,
+    "phpactor": false
+  }
+}
+```
+
+### Plugin Best Practices
+
+1. **Start with official plugins** -- they're curated and maintained
+2. **One LSP per language** -- don't enable both `phpactor` and `php-lsp`
+3. **Disable unused plugins** -- each active plugin consumes resources and context
+4. **Audit community sources** -- review what a plugin does before installing
+5. **Set `enableAllProjectMcpServers: false`** -- never auto-trust project MCP configs from unknown repos
+
+### The Ecosystem
+
+The Claude Code ecosystem (as of mid-2026) includes:
+- **4,200+** community skills
+- **770+** MCP servers
+- **2,500+** marketplace entries
+
+See [Plugins & Tools Directory](../resources/plugins-and-tools.md) for a curated list.
+
 ---
 
 ## Exercise 6.1: Set Up Context7
@@ -248,18 +315,29 @@ Example tools a custom server might expose:
 
 ---
 
+## Exercise 6.4: Install a Plugin
+
+1. Run `/install context7` to install from the official marketplace
+2. Check the plugin loaded: `/mcp`
+3. Test it: ask Claude about a library's latest API
+4. Disable it in settings to see the difference
+
+---
+
 ## Common Pitfalls
 
 - **Not restarting after `.mcp.json` changes**: MCP servers load at session start. Restart Claude Code after editing config.
 - **Missing npx/node**: MCP servers typically need Node.js installed globally.
 - **Forgetting environment variables**: Database servers need connection strings. Use the `env` field.
-- **Too many servers**: Each server consumes resources. Only configure what you actually use.
+- **Too many servers/plugins**: Each consumes resources and context. Only configure what you actually use.
+- **Enabling all project MCP servers**: Never set `enableAllProjectMcpServers: true` -- untrusted projects could load malicious servers.
 
 ## Key Takeaways
 
-1. MCP servers extend Claude Code with external tools — browsers, databases, docs, APIs
-2. Context7 for docs and Playwright for browser automation are the essential servers
-3. Configure in `.mcp.json` (project) or `~/.claude.json` (personal)
-4. Servers communicate via stdio (subprocess) or HTTP
-5. Permission settings control which MCP tools Claude can use
-6. Use `/mcp` and `claude doctor` to manage and diagnose servers
+1. MCP servers extend Claude Code with external tools -- browsers, databases, docs, APIs
+2. Plugins bundle agents, skills, and tools into installable packages from marketplaces
+3. Context7 for docs and Playwright for browser automation are the essential servers
+4. Configure MCP in `.mcp.json` (project) or `~/.claude.json` (personal)
+5. Install plugins with `/install` from official or community marketplaces
+6. Permission settings control which MCP tools Claude can use
+7. Disable unused plugins and audit community sources before installing
