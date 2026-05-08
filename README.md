@@ -2,7 +2,7 @@
 
 A structured, hands-on training course for mastering Claude Code — from first launch to advanced agentic engineering.
 
-Built from the community best practices at [shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice) and official Anthropic documentation.
+Built from the community best practices at [shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice), official Anthropic documentation, and curated insights from GitHub, Reddit, and Hacker News.
 
 ## Course Structure
 
@@ -19,9 +19,9 @@ Built from the community best practices at [shanraisshan/claude-code-best-practi
 | [8](modules/08-orchestration.md) | Orchestration: Command + Agent + Skill | 60 min | Advanced |
 | [9](modules/09-agent-teams.md) | Agent Teams: Multi-Session Coordination | 60 min | Advanced |
 | [10](modules/10-workflows.md) | Real-World Workflows & Patterns | 60 min | Advanced |
-| [11](modules/11-tips-and-optimization.md) | Tips, Tricks & Optimization | 45 min | All |
+| [11](modules/11-tips-and-optimization.md) | Tips, Tricks & Optimization | 60 min | All |
 
-**Total: ~9 hours of structured learning**
+**Total: ~9.25 hours of structured learning**
 
 ## How to Use This Course
 
@@ -34,6 +34,16 @@ Each module includes:
 - Hands-on exercises
 - Common pitfalls
 - Key takeaways
+
+## Resources
+
+| Resource | Description |
+|----------|-------------|
+| [Cheat Sheet](resources/cheatsheet.md) | Quick reference card for commands, shortcuts, and file structure |
+| [Community Tips & Insights](resources/community-tips.md) | Best tips from GitHub, Reddit, and Hacker News |
+| [Plugins & Tools Directory](resources/plugins-and-tools.md) | Curated directory of 800+ plugins, MCP servers, and tools |
+| [Configuration Best Practices](resources/config-best-practices.md) | Production-grade configuration guide |
+| [Glossary](resources/glossary.md) | Key terms and concepts |
 
 ## Prerequisites
 
